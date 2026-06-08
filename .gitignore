@@ -1,19 +1,7 @@
-.dart_tool/
-.packages
-.pub-cache/
-.pub/
-build/
-*.iml
-.idea/
-.vscode/
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-android/.gradle/
-android/local.properties
-android/app/debug/
-android/app/profile/
-android/app/release/
-*.jks
+```
+# Directories
+x-oqs_temp/
+
+# Files
+x-oqs-new
+```

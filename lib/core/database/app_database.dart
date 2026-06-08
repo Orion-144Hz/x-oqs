@@ -19,8 +19,9 @@ class AppDatabase {
       path,
       version: 1,
       onCreate: (db, version) async {
+        // Create all tables with IF NOT EXISTS
         await db.execute('''
-CREATE TABLE songs (
+CREATE TABLE IF NOT EXISTS songs (
   id TEXT PRIMARY KEY,
   youtube_id TEXT NOT NULL,
   title TEXT NOT NULL,
@@ -34,10 +35,12 @@ CREATE TABLE songs (
   last_played_ms INTEGER,
   updated_at_ms INTEGER NOT NULL
 );
-CREATE INDEX idx_songs_youtube ON songs(youtube_id);
-CREATE INDEX idx_songs_liked ON songs(is_liked);
+''');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_songs_youtube ON songs(youtube_id);');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_songs_liked ON songs(is_liked);');
 
-CREATE TABLE playlists (
+        await db.execute('''
+CREATE TABLE IF NOT EXISTS playlists (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
@@ -48,15 +51,19 @@ CREATE TABLE playlists (
   created_at_ms INTEGER NOT NULL,
   updated_at_ms INTEGER NOT NULL
 );
+''');
 
-CREATE TABLE artists (
+        await db.execute('''
+CREATE TABLE IF NOT EXISTS artists (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   image_url TEXT,
   is_followed INTEGER NOT NULL DEFAULT 0
 );
+''');
 
-CREATE TABLE albums (
+        await db.execute('''
+CREATE TABLE IF NOT EXISTS albums (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   artist_name TEXT NOT NULL,
@@ -64,16 +71,20 @@ CREATE TABLE albums (
   year INTEGER,
   track_ids TEXT NOT NULL
 );
+''');
 
-CREATE TABLE play_history (
+        await db.execute('''
+CREATE TABLE IF NOT EXISTS play_history (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   song_id TEXT NOT NULL,
   played_at_ms INTEGER NOT NULL,
   listen_sec INTEGER NOT NULL DEFAULT 0
 );
-CREATE INDEX idx_history_played ON play_history(played_at_ms DESC);
+''');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_history_played ON play_history(played_at_ms DESC);');
 
-CREATE TABLE download_jobs (
+        await db.execute('''
+CREATE TABLE IF NOT EXISTS download_jobs (
   job_id TEXT PRIMARY KEY,
   song_id TEXT NOT NULL,
   status INTEGER NOT NULL,
@@ -83,21 +94,29 @@ CREATE TABLE download_jobs (
   error_message TEXT,
   updated_at_ms INTEGER NOT NULL
 );
+''');
 
-CREATE TABLE stream_url_cache (
+        await db.execute('''
+CREATE TABLE IF NOT EXISTS stream_url_cache (
   youtube_id TEXT PRIMARY KEY,
   url TEXT NOT NULL,
   expires_at_ms INTEGER NOT NULL,
   quality_label TEXT
 );
+''');
 
-CREATE TABLE search_cache (
+        await db.execute('''
+CREATE TABLE IF NOT EXISTS search_cache (
   query_key TEXT PRIMARY KEY,
   payload TEXT NOT NULL,
   cached_at_ms INTEGER NOT NULL,
   ttl_sec INTEGER NOT NULL
 );
 ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        // For future migrations - currently no upgrade needed as v1 has all tables
+        // If schema changes in future, add ALTER TABLE or recreate logic here
       },
     );
     return _db!;
